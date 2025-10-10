@@ -1,0 +1,51 @@
+
+
+
+<form [formGroup]="recidenceForm" (ngSubmit)="onSubmit()">
+    <ion-item>
+        <ion-label position="floating">Nombre del nuevo ingreso</ion-label>
+        <ion-input formControlName="name" type="text" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+        <ion-label position="floating">Asistente Médico designado</ion-label>
+        <ion-input formControlName="medical_assistant" type="text" required></ion-input>
+    </ion-item>
+    
+    <ion-button expand="full" type="submit" [disabled]="recidenceForm.invalid">
+        {{ isEditing ? 'Guardar Cambios' : 'Registrar usuario' }} 
+    </ion-button>
+
+    <ion-button *ngIf="isEditing" color="medium" expand="full" (click)="resetForm()">
+        Cancelar Edición
+    </ion-button>
+</form>
+
+<ion-list>
+    </ion-list>
+
+
+
+
+
+
+<ion-list>
+    <ion-item *ngFor="let recidence of usersRecidence">
+        <ion-label>
+            <h2>{{ recidence.name }}</h2>
+            <p>ID: {{ recidence.id }}</p>
+            <p>Asistente: {{ recidence.medical_assistant }}</p>
+            
+        </ion-label>
+
+        <div slot="end">
+            <ion-button color="primary" fill="clear" (click)="editRecidence(recidence)">
+                <ion-icon name="create"></ion-icon>
+            </ion-button>
+
+            <ion-button color="danger" fill="clear" (click)="confirmDelete(recidence.id)">
+                <ion-icon name="trash"></ion-icon>
+            </ion-button>
+        </div>
+    </ion-item>
+</ion-list>
