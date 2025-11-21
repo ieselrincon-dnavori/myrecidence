@@ -1,27 +1,37 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AlertController, NavController } from '@ionic/angular'; // 👈 Importar para alertas y navegación
+import { AlertController } from '@ionic/angular';
 import { RecidenceService } from '../services/recidence-service';
+
+
 
 @Component({
   selector: 'app-my-recidence',
   templateUrl: './my-recidence.page.html',
   styleUrls: ['./my-recidence.page.scss'],
-  standalone: false
+  standalone: false // <-- aquí
 })
+
+
+
+
 export class MyRecidencePage implements OnInit {
 
   usersRecidence: any[] = [];
   recidenceForm!: FormGroup;
   submitted = false;
-  isEditing = false; // 👈 Estado para saber si estamos creando o editando
-  currentRecidenceId: number | null = null; // 👈 ID del registro en edición
+  isEditing = false;
+  currentRecidenceId: number | null = null;
+
+  // 📸 Imagen
+  selectedFile: File | null = null;
+  imagePreview: string | ArrayBuffer | null = null;
+  @ViewChild('fileInput') fileInput!: ElementRef;
 
   constructor(
     private fb: FormBuilder,
     private recidenceService: RecidenceService,
-    private alertController: AlertController, // 👈 Inyectar AlertController
-    private navCtrl: NavController // 👈 Inyectar NavController (o Router)
+    private alertController: AlertController
   ) {}
 
   ngOnInit() {
@@ -37,120 +47,100 @@ export class MyRecidencePage implements OnInit {
       next: (data: any) => {
         this.usersRecidence = data;
       },
-      error: (err) => {
-        console.error('Error cargando usuarios:', err);
-      }
+      error: (err) => console.error('Error cargando usuarios:', err)
     });
   }
 
-  // ------------------------------------------------------------------
-  // 🔹 CREATE (Crear) y UPDATE (Actualizar)
-  // ------------------------------------------------------------------
-  onSubmit() {
-    this.submitted = true;
-
-    if (this.recidenceForm.invalid) {
-      return;
-    }
-
-    const recidenceData = this.recidenceForm.value;
-
-    if (this.isEditing && this.currentRecidenceId) {
-      // ✅ Lógica de ACTUALIZACIÓN (UPDATE)
-      this.recidenceService.updateRecidence(this.currentRecidenceId, recidenceData).subscribe({
-        next: () => {
-          console.log('Usuario actualizado con éxito');
-          this.resetForm();
-          this.loadUsers(); // Recargar lista
-        },
-        error: (err) => {
-          console.error('Error al actualizar usuario:', err);
-        }
-      });
+  onFileChange(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = e => this.imagePreview = reader.result;
+      reader.readAsDataURL(file);
     } else {
-      // ✅ Lógica de CREACIÓN (CREATE)
-      this.recidenceService.addRecidence(recidenceData).subscribe({
-        next: (res) => {
-          console.log('Usuario creado:', res);
-          this.resetForm();
-          this.loadUsers(); // Recargar lista
-        },
-        error: (err) => {
-          console.error('Error al crear usuario:', err);
-        }
-      });
+      this.selectedFile = null;
+      this.imagePreview = null;
     }
   }
 
-  // ------------------------------------------------------------------
-  // 🔸 Funciones de Edición
-  // ------------------------------------------------------------------
+  onSubmit() {
+  this.submitted = true;
+  if (this.recidenceForm.invalid) return;
 
-  /** Prepara el formulario para editar un registro existente */
-  editRecidence(recidence: any) {
-    this.isEditing = true;
-    this.currentRecidenceId = recidence.id; // Asume que el ID se llama 'id'
+  const formData = new FormData();
+  const recidenceData = this.recidenceForm.value;
 
-    // Rellenar el formulario con los datos del registro
-    this.recidenceForm.patchValue({
-      name: recidence.name,
-      medical_assistant: recidence.medical_assistant
-      // ... otros campos
+  formData.append('name', recidenceData.name);
+  formData.append('medical_assistant', recidenceData.medical_assistant);
+
+  if (this.selectedFile) {
+    formData.append('photo', this.selectedFile, this.selectedFile.name);
+  }
+
+  if (this.isEditing && this.currentRecidenceId) {
+    this.recidenceService.updateRecidence(this.currentRecidenceId, formData).subscribe({
+      next: () => {
+        this.resetForm();
+        this.loadUsers();
+      },
+      error: err => console.error('Error al actualizar:', err)
     });
-
-    // Opcional: Desplazarse al formulario para que el usuario pueda editar
-    // this.navCtrl.navigateForward('/edit-recidence/' + recidence.id); 
+  } else {
+    this.recidenceService.addRecidence(formData).subscribe({
+      next: () => {
+        this.resetForm();
+        this.loadUsers();
+      },
+      error: err => console.error('Error al crear:', err)
+    });
   }
+}
+  currentImageUrl: string | null = null;
+  editRecidence(recidence: any) {
+  this.isEditing = true;
+  this.currentRecidenceId = recidence.id;
+  this.selectedFile = null;
+  this.currentImageUrl = recidence.image_url || null; // Guardamos la imagen actual
+  this.imagePreview = recidence.image_url || null;
 
-  /** Cancela la edición y resetea el formulario */
+  this.recidenceForm.patchValue({
+    name: recidence.name,
+    medical_assistant: recidence.medical_assistant
+  });
+}
+
+
   resetForm() {
-    this.isEditing = false;
-    this.currentRecidenceId = null;
-    this.submitted = false;
-    this.recidenceForm.reset();
-  }
+  this.isEditing = false;
+  this.currentRecidenceId = null;
+  this.submitted = false;
+  this.recidenceForm.reset();
+  this.selectedFile = null;
+  this.imagePreview = null;
+  this.currentImageUrl = null;
+  if (this.fileInput?.nativeElement) this.fileInput.nativeElement.value = '';
+}
 
-
-  // ------------------------------------------------------------------
-  // 🛑 DELETE (Borrar)
-  // ------------------------------------------------------------------
-
-  /** Muestra una alerta de confirmación antes de borrar */
   async confirmDelete(id: number) {
     const alert = await this.alertController.create({
       header: 'Confirmar Borrado',
-      message: '¿Estás seguro de que deseas eliminar este registro?',
+      message: '¿Deseas eliminar este registro?',
       buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel'
-        },
-        {
-          text: 'Eliminar',
-          handler: () => {
-            this.deleteRecidence(id);
-          }
-        }
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Eliminar', handler: () => this.deleteRecidence(id) }
       ]
     });
-
     await alert.present();
   }
 
-  /** Ejecuta la llamada al servicio para eliminar el registro */
   deleteRecidence(id: number) {
     this.recidenceService.deleteRecidence(id).subscribe({
-      next: () => {
-        console.log(`Registro con ID ${id} eliminado con éxito.`);
-        this.loadUsers(); // Recargar la lista después del borrado
-      },
-      error: (err) => {
-        console.error('Error al eliminar registro:', err);
-      }
+      next: () => this.loadUsers(),
+      error: err => console.error('Error al eliminar:', err)
     });
   }
 
-  // ✅ Acceso rápido a controles del formulario (para mensajes de error)
   get f() {
     return this.recidenceForm.controls;
   }

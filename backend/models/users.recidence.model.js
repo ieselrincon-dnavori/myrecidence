@@ -1,5 +1,8 @@
+// models/users.recidence.model.js
+
 module.exports = (sequelize, DataTypes) => {
-    const UserRecidence = sequelize.define('user.recidence', {
+    // El nombre de la tabla en la DB será 'user_recidences' por defecto (pluralizado)
+    const UserRecidence = sequelize.define('user_recidence', { 
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
@@ -12,7 +15,12 @@ module.exports = (sequelize, DataTypes) => {
         medical_assistant: {
             type: DataTypes.STRING,
             allowNull: true
+        },
+        // 🚨 IMPORTANTE: Añadir el campo 'photo' que está usando en el controlador
+        photo: {
+            type: DataTypes.STRING,
+            allowNull: true
         }
     });
     return UserRecidence;
-}
+};

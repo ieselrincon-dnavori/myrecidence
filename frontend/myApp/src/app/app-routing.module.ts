@@ -1,9 +1,5 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-import { ReactiveFormsModule } from '@angular/forms';
-import { FormsModule } from '@angular/forms';
-
-
 
 const routes: Routes = [
   {
@@ -12,15 +8,19 @@ const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: 'home',
+    redirectTo: 'login',
     pathMatch: 'full'
+  },
+  {
+    path: 'login',
+    // ************ CORRECCIÓN AQUÍ ************
+    // Se importa el módulo (.module) y se busca la clase del módulo (LoginPageModule)
+    loadChildren: () => import('./login/login.module').then(m => m.LoginPageModule)
   },
   {
     path: 'my-recidence',
     loadChildren: () => import('./my-recidence/my-recidence.module').then( m => m.MyRecidencePageModule)
   }
-  
-  
 ];
 
 @NgModule({

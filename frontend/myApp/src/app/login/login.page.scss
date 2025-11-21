@@ -1,0 +1,87 @@
+/* ==================================== */
+/* Estilos Generales de la Página (SCSS) */
+/* ==================================== */
+
+// Centrar contenido en la pantalla
+ion-content {
+    --background: var(--ion-color-light); // Fondo claro para la página
+
+    // Contenedor principal para centrar la tarjeta de login
+    .main-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center; // Centrado vertical
+        align-items: center;    // Centrado horizontal
+        min-height: 100%;       // Asegura que ocupe todo el espacio de ion-content
+        padding: 20px;
+    }
+}
+
+/* ==================================== */
+/* Estilos del Logo y Encabezado */
+/* ==================================== */
+
+.header-content {
+    text-align: center;
+    margin-bottom: 40px;
+
+    // Estilo del logo o icono grande
+    .logo {
+        font-size: 5rem;
+        color: var(--ion-color-primary); // Usa el color primario de Ionic
+        margin-bottom: 10px;
+    }
+
+    h1 {
+        font-weight: 700;
+        font-size: 1.8rem;
+        color: #333;
+    }
+}
+
+/* ==================================== */
+/* Estilos del Formulario y Tarjeta */
+/* ==================================== */
+
+// Estilos para la tarjeta que contiene el formulario
+ion-card {
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 10px;
+}
+
+// Estilo de los campos de entrada
+ion-item {
+    --border-radius: 8px;
+    --border-color: var(--ion-color-medium-tint);
+    --border-width: 1px;
+    --inner-border-width: 0; // Oculta la línea divisoria interna
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+// Estilo de los iconos dentro de los campos
+ion-icon {
+    color: var(--ion-color-medium);
+    margin-right: 10px;
+}
+
+// Estilo del botón de inicio de sesión
+ion-button[type="submit"] {
+    margin-top: 25px;
+    --border-radius: 8px;
+    height: 48px;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+// Estilo del enlace de recuperación de contraseña
+.forgot-password {
+    display: block;
+    text-align: right;
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: var(--ion-color-secondary);
+}

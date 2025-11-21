@@ -1,51 +1,70 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Gestión de Residentes</ion-title>
+  </ion-toolbar>
+</ion-header>
 
+<ion-content class="ion-padding">
 
+  <form [formGroup]="recidenceForm" (ngSubmit)="onSubmit()">
+    <ion-list lines="full">
+      <ion-item>
+        <ion-label position="floating">Nombre del Residente</ion-label>
+        <ion-input formControlName="name" type="text"></ion-input>
+      </ion-item>
 
-<form [formGroup]="recidenceForm" (ngSubmit)="onSubmit()">
-    <ion-item>
-        <ion-label position="floating">Nombre del nuevo ingreso</ion-label>
-        <ion-input formControlName="name" type="text" required></ion-input>
-    </ion-item>
+      <ion-item>
+        <ion-label position="floating">Asistente Médico</ion-label>
+        <ion-input formControlName="medical_assistant" type="text"></ion-input>
+      </ion-item>
 
-    <ion-item>
-        <ion-label position="floating">Asistente Médico designado</ion-label>
-        <ion-input formControlName="medical_assistant" type="text" required></ion-input>
-    </ion-item>
-    
-    <ion-button expand="full" type="submit" [disabled]="recidenceForm.invalid">
-        {{ isEditing ? 'Guardar Cambios' : 'Registrar usuario' }} 
-    </ion-button>
-
-    <ion-button *ngIf="isEditing" color="medium" expand="full" (click)="resetForm()">
-        Cancelar Edición
-    </ion-button>
-</form>
-
-<ion-list>
+      <ion-item>
+        <ion-label position="stacked">Foto del Residente</ion-label>
+        <input type="file" #fileInput (change)="onFileChange($event)" accept="image/*">
+      </ion-item>
     </ion-list>
 
+    <ion-card *ngIf="imagePreview" class="ion-margin-top">
+      <ion-card-header>
+        <ion-card-title>Vista Previa</ion-card-title>
+      </ion-card-header>
+      <ion-card-content class="ion-text-center">
+        <img [src]="imagePreview" alt="Vista Previa" style="max-width:150px; max-height:150px; border-radius:8px; object-fit:cover;">
+      </ion-card-content>
+    </ion-card>
 
+    <ion-button expand="full" type="submit" [disabled]="recidenceForm.invalid" class="ion-margin-top">
+      {{ isEditing ? 'Guardar Cambios' : 'Registrar Residente' }}
+    </ion-button>
 
+    <ion-button *ngIf="isEditing" color="medium" expand="full" (click)="resetForm()" fill="outline">
+      Cancelar Edición
+    </ion-button>
+  </form>
 
+  <ion-card *ngFor="let recidence of usersRecidence" class="ion-margin-top">
+    <ion-card-content>
+      <div style="display:flex; align-items:center;">
+        
+        <img *ngIf="recidence.image_url" [src]="recidence.image_url" alt="Foto" style="width:80px; height:80px; border-radius:50%; object-fit:cover;">
+        
+        <ion-icon *ngIf="!recidence.image_url" name="person-circle-outline" style="font-size:80px;"></ion-icon>
 
-
-<ion-list>
-    <ion-item *ngFor="let recidence of usersRecidence">
-        <ion-label>
-            <h2>{{ recidence.name }}</h2>
-            <p>ID: {{ recidence.id }}</p>
-            <p>Asistente: {{ recidence.medical_assistant }}</p>
-            
-        </ion-label>
-
-        <div slot="end">
-            <ion-button color="primary" fill="clear" (click)="editRecidence(recidence)">
-                <ion-icon name="create"></ion-icon>
-            </ion-button>
-
-            <ion-button color="danger" fill="clear" (click)="confirmDelete(recidence.id)">
-                <ion-icon name="trash"></ion-icon>
-            </ion-button>
+        <div style="margin-left:16px;">
+          <ion-card-title>{{ recidence.name }}</ion-card-title>
+          <ion-card-subtitle>Asistente: {{ recidence.medical_assistant }}</ion-card-subtitle>
         </div>
-    </ion-item>
-</ion-list>
+
+        <div style="margin-left:auto;">
+          <ion-button color="primary" fill="clear" size="small" (click)="editRecidence(recidence)">
+            <ion-icon name="create" slot="start"></ion-icon> Editar
+          </ion-button>
+          <ion-button color="danger" fill="clear" size="small" (click)="confirmDelete(recidence.id)">
+            <ion-icon name="trash" slot="start"></ion-icon> Eliminar
+          </ion-button>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>
