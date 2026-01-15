@@ -1,6 +1,6 @@
-# Título del Proyecto
+# Gestión de Residencia
 
-_Acá va un párrafo que describa lo que es el proyecto_
+_Sistema de control de residentes y sus asistentes médicos asignados, autenticación mediante login y token temporal._
 
 ## Comenzando 🚀
 
@@ -8,101 +8,55 @@ _Estas instrucciones te permitirán obtener una copia del proyecto en funcionami
 
 Mira **Deployment** para conocer como desplegar el proyecto.
 
-
 ### Pre-requisitos 📋
 
-_Que cosas necesitas para instalar el software y como instalarlas_
+_Necesitas tener instalados los siguientes entornos para ejecutar el software:_
 
-```
-Da un ejemplo
-```
+* **Node.js** (v18.0.0 o superior)
+* **npm** (incluido con Node.js)
+* **Ionic CLI** (`npm install -g @ionic/cli`)
+* **MySQL** (Servidor local como XAMPP o MySQL Workbench)
 
 ### Instalación 🔧
 
-_Una serie de ejemplos paso a paso que te dice lo que debes ejecutar para tener un entorno de desarrollo ejecutandose_
+_Sigue estos pasos para configurar el entorno de desarrollo:_
 
-_Dí cómo será ese paso_
-
-```
-Da un ejemplo
-```
-
-_Y repite_
-
-```
-hasta finalizar
+1. **Configurar el Backend:**
+_Entra en la carpeta del servidor e instala las dependencias._
+```bash
+cd backend
+npm install
 ```
 
-_Finaliza con un ejemplo de cómo obtener datos del sistema o como usarlos para una pequeña demo_
-
-## Ejecutando las pruebas ⚙️
-
-_Explica como ejecutar las pruebas automatizadas para este sistema_
-
-### Analice las pruebas end-to-end 🔩
-
-_Explica que verifican estas pruebas y por qué_
-
-```
-Da un ejemplo
+2. **Configurar la base de datos:**
+_Asegúrate de configurar el archivo config/db.config.js con tus credenciales de MySQL y ejecuta el servidor para sincronizar las tablas._
+```bash
+node index.js
 ```
 
-### Y las pruebas de estilo de codificación ⌨️
-
-_Explica que verifican estas pruebas y por qué_
-
+3. **Configurar el Frontend:**
+_Entra en la carpeta de la aplicación Ionic e instala las dependencias._
+```bash
+cd ../frontend
+npm install
 ```
-Da un ejemplo
+
+4. **Ejecutar la aplicación:**
+_Lanza el servidor de desarrollo de Ionic._
+```bash
+ionic serve
 ```
-
-## Despliegue 📦
-
-_Agrega notas adicionales sobre como hacer deploy_
+_Para evitar tener que crear una cuenta y volver a poner los datos (correo y contraseña), utilizar el token_
 
 ## Construido con 🛠️
 
-_Menciona las herramientas que utilizaste para crear tu proyecto_
+_Herramientas utilizadas en el desarrollo:_
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - El framework web usado
-* [Maven](https://maven.apache.org/) - Manejador de dependencias
-* [ROME](https://rometools.github.io/rome/) - Usado para generar RSS
+* Ionic - El framework para la aplicación móvil/web
+* Angular - Framework de desarrollo para la lógica del frontend
+* Node.js - Entorno de ejecución para el servidor
+* Express - Framework web para la API
+* Sequelize - ORM para la gestión de la base de datos MySQL
+* JWT - Estándar para la autenticación segura
 
-## Contribuyendo 🖇️
-
-Por favor lee el [CONTRIBUTING.md](https://gist.github.com/villanuevand/xxxxxx) para detalles de nuestro código de conducta, y el proceso para enviarnos pull requests.
-
-## Wiki 📖
-
-Puedes encontrar mucho más de cómo utilizar este proyecto en nuestra [Wiki](https://github.com/tu/proyecto/wiki)
-
-## Versionado 📌
-
-Usamos [SemVer](http://semver.org/) para el versionado. Para todas las versiones disponibles, mira los [tags en este repositorio](https://github.com/tu/proyecto/tags).
-
-## Autores ✒️
-
-_Menciona a todos aquellos que ayudaron a levantar el proyecto desde sus inicios_
-
-* **Andrés Villanueva** - *Trabajo Inicial* - [villanuevand](https://github.com/villanuevand)
-* **Fulanito Detal** - *Documentación* - [fulanitodetal](#fulanito-de-tal)
-
-También puedes mirar la lista de todos los [contribuyentes](https://github.com/your/project/contributors) quíenes han participado en este proyecto. 
-
-## Licencia 📄
-
-Este proyecto está bajo la Licencia (Tu Licencia) - mira el archivo [LICENSE.md](LICENSE.md) para detalles
-
-## Expresiones de Gratitud 🎁
-
-* Comenta a otros sobre este proyecto 📢
-* Invita una cerveza 🍺 o un café ☕ a alguien del equipo. 
-* Da las gracias públicamente 🤓.
-* Dona con cripto a esta dirección: `0xf253fc233333078436d111175e5a76a649890000`
-* etc.
-
-
-
----
-
-Formato Correcto: DELETE http://localhost:8080/api/users_recidence/12
-Formato Incorrecto: DELETE http://localhost:8080/api/users_recidence?id=12
+  
