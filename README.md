@@ -1,165 +1,108 @@
-🏡 Backend: Gestión de Residentes (Residencia de Tercera Edad)
+# Título del Proyecto
 
-Este repositorio contiene el servidor backend para el sistema de gestión de residentes y tareas, desarrollado con Node.js, Express, Sequelize y MySQL.
+_Acá va un párrafo que describa lo que es el proyecto_
 
-🚀 Inicio Rápido
+## Comenzando 🚀
 
-Prerrequisitos
+_Estas instrucciones te permitirán obtener una copia del proyecto en funcionamiento en tu máquina local para propósitos de desarrollo y pruebas._
 
-Antes de comenzar, asegúrate de tener instalado:
+Mira **Deployment** para conocer como desplegar el proyecto.
 
-Node.js (versión 16 o superior).
 
-MySQL (o MariaDB) para la base de datos.
+### Pre-requisitos 📋
 
-Postman o una herramienta similar para probar las API.
+_Que cosas necesitas para instalar el software y como instalarlas_
 
-Configuración del Entorno
+```
+Da un ejemplo
+```
 
-Instalar dependencias:
+### Instalación 🔧
 
-npm install
+_Una serie de ejemplos paso a paso que te dice lo que debes ejecutar para tener un entorno de desarrollo ejecutandose_
 
+_Dí cómo será ese paso_
 
-Configurar la Base de Datos:
-Asegúrate de que tu archivo de configuración de base de datos (config/db.config.js) apunta a una instancia de MySQL en ejecución con las credenciales correctas.
+```
+Da un ejemplo
+```
 
-La base de datos se sincronizará automáticamente al iniciar el servidor (creando las tablas user_recidences y tasks).
+_Y repite_
 
-Iniciar el Servidor:
+```
+hasta finalizar
+```
 
-node index.js
+_Finaliza con un ejemplo de cómo obtener datos del sistema o como usarlos para una pequeña demo_
 
+## Ejecutando las pruebas ⚙️
 
-El servidor se ejecutará en el puerto 8080.
+_Explica como ejecutar las pruebas automatizadas para este sistema_
 
-⚙️ Estructura del Proyecto
+### Analice las pruebas end-to-end 🔩
 
-config/: Archivo de configuración de la base de datos.
+_Explica que verifican estas pruebas y por qué_
 
-controllers/: Contiene la lógica de negocio (CRUD) para Residentes y Tareas.
+```
+Da un ejemplo
+```
 
-models/: Definiciones de los modelos de Sequelize (user_recidence y task).
+### Y las pruebas de estilo de codificación ⌨️
 
-routes/: Definición de las rutas de la API (Endpoints).
+_Explica que verifican estas pruebas y por qué_
 
-uploads/: Carpeta donde se almacenan las fotos de los residentes (gestionada por Multer).
+```
+Da un ejemplo
+```
 
-💡 Endpoints de la API
+## Despliegue 📦
 
-La API expone dos recursos principales: Residentes y Tareas.
+_Agrega notas adicionales sobre como hacer deploy_
 
-1. Residentes (/api/users_recidence)
+## Construido con 🛠️
 
-Este CRUD permite gestionar la información principal de los residentes, incluyendo la subida y limpieza de fotos.
+_Menciona las herramientas que utilizaste para crear tu proyecto_
 
-Método
+* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - El framework web usado
+* [Maven](https://maven.apache.org/) - Manejador de dependencias
+* [ROME](https://rometools.github.io/rome/) - Usado para generar RSS
 
-Endpoint
+## Contribuyendo 🖇️
 
-Descripción
+Por favor lee el [CONTRIBUTING.md](https://gist.github.com/villanuevand/xxxxxx) para detalles de nuestro código de conducta, y el proceso para enviarnos pull requests.
 
-Cuerpo (Body)
+## Wiki 📖
 
-Notas
+Puedes encontrar mucho más de cómo utilizar este proyecto en nuestra [Wiki](https://github.com/tu/proyecto/wiki)
 
-GET
+## Versionado 📌
 
-/api/users_recidence
+Usamos [SemVer](http://semver.org/) para el versionado. Para todas las versiones disponibles, mira los [tags en este repositorio](https://github.com/tu/proyecto/tags).
 
-Recupera todos los residentes.
+## Autores ✒️
 
-N/A
+_Menciona a todos aquellos que ayudaron a levantar el proyecto desde sus inicios_
 
+* **Andrés Villanueva** - *Trabajo Inicial* - [villanuevand](https://github.com/villanuevand)
+* **Fulanito Detal** - *Documentación* - [fulanitodetal](#fulanito-de-tal)
 
+También puedes mirar la lista de todos los [contribuyentes](https://github.com/your/project/contributors) quíenes han participado en este proyecto. 
 
-POST
+## Licencia 📄
 
-/api/users_recidence
+Este proyecto está bajo la Licencia (Tu Licencia) - mira el archivo [LICENSE.md](LICENSE.md) para detalles
 
-Crea un nuevo residente.
+## Expresiones de Gratitud 🎁
 
-form-data (name, medical_assistant, photo)
+* Comenta a otros sobre este proyecto 📢
+* Invita una cerveza 🍺 o un café ☕ a alguien del equipo. 
+* Da las gracias públicamente 🤓.
+* Dona con cripto a esta dirección: `0xf253fc233333078436d111175e5a76a649890000`
+* etc.
 
-La foto es opcional.
 
-PUT
 
-/api/users_recidence/:id
-
-Actualiza un residente.
-
-form-data (name, medical_assistant, photo)
-
-Si se sube photo, la imagen antigua se elimina del disco.
-
-DELETE
-
-/api/users_recidence/:id
-
-Elimina un residente.
-
-N/A
-
-Si el residente tenía foto, esta se elimina del disco.
-
-Ejemplo de URL para PUT/DELETE: http://localhost:8080/api/users_recidence/5
-
-2. Tareas (/api/tasks) ( SIN IMPLEMENTAR)
-
-Este CRUD gestiona las tareas relacionadas con cada residente.
-
-Método
-
-Endpoint
-
-Descripción
-
-Cuerpo (Body)
-
-GET
-
-/api/tasks
-
-Recupera todas las tareas.
-
-N/A
-
-GET
-
-/api/tasks?residentId=X
-
-Filtra tareas por ID de residente.
-
-N/A
-
-POST
-
-/api/tasks
-
-Crea una nueva tarea.
-
-JSON (title, description, status, userRecidenceId)
-
-PUT
-
-/api/tasks/:id
-
-Actualiza una tarea por ID.
-
-JSON (Campos a modificar)
-
-DELETE
-
-/api/tasks/:id
-
-Elimina una tarea por ID.
-
-N/A
-
-⚠️ NOTA Importante sobre Rutas (PUT/DELETE)
-
-Para las operaciones de actualización (PUT) y eliminación (DELETE), el ID del recurso (Residente o Tarea) debe pasarse como parte de la ruta, no como un query parameter.
+---
 
 Formato Correcto: DELETE http://localhost:8080/api/users_recidence/12
 Formato Incorrecto: DELETE http://localhost:8080/api/users_recidence?id=12
