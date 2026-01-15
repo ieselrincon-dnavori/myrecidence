@@ -22,9 +22,12 @@ db.sequelize.sync({ alter: true }).then(() => {
 
 // Rutas de Residentes
 require('./routes/user.recidence.routes.js')(app);
-
+// Rutas de Autenticación
+require('./routes/auth.routes.js')(app);
 // Rutas de Tareas <-- NUEVAS RUTAS
 //require('./routes/task.routes.js')(app);
+require("./routes/medical.assistant.routes.js")(app);
+
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

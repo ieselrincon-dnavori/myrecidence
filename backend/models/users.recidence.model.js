@@ -1,7 +1,6 @@
 // models/users.recidence.model.js
 
 module.exports = (sequelize, DataTypes) => {
-    // El nombre de la tabla en la DB será 'user_recidences' por defecto (pluralizado)
     const UserRecidence = sequelize.define('user_recidence', { 
         id: {
             type: DataTypes.INTEGER,
@@ -12,11 +11,16 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
-        medical_assistant: {
-            type: DataTypes.STRING,
-            allowNull: true
+        // ❌ ELIMINA ESTO: medical_assistant: { type: DataTypes.STRING }
+        // ✅ AÑADE ESTO (La clave foránea real):
+        medicalAssistantId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'medical_assistants', // nombre de la tabla destino
+                key: 'id'
+            }
         },
-        // 🚨 IMPORTANTE: Añadir el campo 'photo' que está usando en el controlador
         photo: {
             type: DataTypes.STRING,
             allowNull: true

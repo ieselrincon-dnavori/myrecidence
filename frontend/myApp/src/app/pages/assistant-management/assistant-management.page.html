@@ -1,0 +1,61 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/my-recidence"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Gestión de Asistentes</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>{{ isEditing ? 'Editar Asistente' : 'Registrar Nuevo Asistente' }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="assistantForm" (ngSubmit)="onSubmit()">
+        <ion-item lines="full">
+          <ion-label position="floating">Nombre Completo</ion-label>
+          <ion-input formControlName="name" type="text"></ion-input>
+        </ion-item>
+        
+        <ion-item lines="full">
+          <ion-label position="floating">Especialidad</ion-label>
+          <ion-input formControlName="specialty" type="text"></ion-input>
+        </ion-item>
+
+        <ion-button expand="full" type="submit" class="ion-margin-top" [disabled]="assistantForm.invalid">
+          <ion-icon [name]="isEditing ? 'save-outline' : 'person-add-outline'" slot="start"></ion-icon>
+          {{ isEditing ? 'Guardar Cambios' : 'Añadir Asistente' }}
+        </ion-button>
+
+        <ion-button *ngIf="isEditing" expand="full" fill="outline" color="medium" (click)="resetForm()">
+          Cancelar
+        </ion-button>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-list lines="full">
+    <ion-list-header>
+      <ion-label>Asistentes Activos</ion-label>
+    </ion-list-header>
+
+    <ion-item *ngFor="let ast of assistants">
+      <ion-icon name="medkit-outline" slot="start" color="primary"></ion-icon>
+      <ion-label>
+        <h2>{{ ast.name }}</h2>
+        <p>{{ ast.specialty }}</p>
+      </ion-label>
+      
+      <ion-buttons slot="end">
+        <ion-button color="primary" (click)="editAssistant(ast)">
+          <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+        <ion-button color="danger" (click)="confirmDelete(ast.id)">
+          <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-item>
+  </ion-list>
+</ion-content>

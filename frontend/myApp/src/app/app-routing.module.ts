@@ -20,6 +20,14 @@ const routes: Routes = [
   {
     path: 'my-recidence',
     loadChildren: () => import('./my-recidence/my-recidence.module').then( m => m.MyRecidencePageModule)
+  },
+  {
+    path: 'register',
+    loadChildren: () => import('./register/register.module').then( m => m.RegisterPageModule)
+  },
+  {
+    path: 'assistant-management',
+    loadChildren: () => import('./pages/assistant-management/assistant-management.module').then( m => m.AssistantManagementPageModule)
   }
 ];
 

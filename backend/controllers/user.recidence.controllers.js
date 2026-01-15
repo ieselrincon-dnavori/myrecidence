@@ -1,147 +1,153 @@
 const db = require('../models');
 const UserRecidence = db.userRecidence;
+const MedicalAssistant = db.medicalAssistant; // Importante para validaciones
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// URL Base del servidor para el frontend
 const BASE_URL = 'http://localhost:8080';
-
-// Función auxiliar para construir la ruta completa de la carpeta 'uploads'
-// path.resolve() garantiza la ruta absoluta desde la raíz del sistema de archivos
 const getUploadDir = () => path.resolve(__dirname, '..', 'uploads'); 
 
-/**
- * Elimina un archivo de la carpeta de subidas.
- * @param {string | null} filename Nombre del archivo a eliminar (ej: 1700000000000.jpg)
- */
 const deleteFile = (filename) => {
     if (!filename) return;
-    
-    // Construimos la ruta COMPLETA del archivo
     const filePath = path.join(getUploadDir(), filename); 
-    
-    // --- MENSAJES DE DEPURACIÓN CRÍTICOS ---
-    console.log(`[FILE_CLEANUP] 🚦 Intentando borrar archivo en ruta: ${filePath}`);
-
-    // Verificamos si el archivo existe antes de intentar borrarlo
     if (fs.existsSync(filePath)) {
         try {
             fs.unlinkSync(filePath); 
-            console.log(`[FILE_CLEANUP] ✅ Archivo antiguo ELIMINADO correctamente: ${filename}`);
+            console.log(`[FILE_CLEANUP] ✅ Archivo eliminado: ${filename}`);
         } catch (error) {
-            // ¡ESTO ES LO QUE NECESITO VER! Muestra el error exacto (ej: EPERM, ENOENT)
-            console.error(`[FILE_CLEANUP] ❌ ERROR AL ELIMINAR ${filename}:`, error.message);
-            console.error(`[FILE_CLEANUP] Ruta que dio error: ${filePath}`);
+            console.error(`[FILE_CLEANUP] ❌ ERROR:`, error.message);
         }
-    } else {
-        console.log(`[FILE_CLEANUP] ⚠️ Archivo NO encontrado para borrar: ${filePath}`);
     }
 };
 
-// Configuración de Multer
 const storage = multer.diskStorage({
-  // Usamos la ruta absoluta
-  destination: (req, file, cb) => {
-    const uploadDir = getUploadDir();
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
+    destination: (req, file, cb) => {
+        const uploadDir = getUploadDir();
+        if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
 });
 const upload = multer({ storage });
-
 exports.upload = upload.single('photo');
 
-// Crear nueva residencia
+// --- OPERACIONES CRUD ---
+
+// Crear nueva residencia con validación de cupo
 exports.create = async (req, res) => {
   try {
     if (!req.body.name) return res.status(400).send({ message: "El nombre es obligatorio!" });
 
-    const userRecidence = {
+    // 1. LIMPIEZA IGUAL QUE EN UPDATE
+    let assistantId = req.body.medicalAssistantId;
+    if (assistantId === 'null' || assistantId === '' || assistantId === undefined) {
+        assistantId = null;
+    } else {
+        assistantId = parseInt(assistantId, 10);
+    }
+
+    // 2. VALIDACIÓN DE CUPO
+    if (assistantId) {
+        const count = await UserRecidence.count({ where: { medicalAssistantId: assistantId } });
+        if (count >= 3) {
+            return res.status(400).send({ 
+                message: "Este asistente ya tiene el cupo máximo de 3 residentes asignados." 
+            });
+        }
+    }
+
+    const userRecidenceData = {
       name: req.body.name,
-      medical_assistant: req.body.medical_assistant,
-      photo: req.file ? req.file.filename : null // Guarda el nombre de archivo
+      medicalAssistantId: assistantId, // <--- Ahora es un número real
+      photo: req.file ? req.file.filename : null
     };
 
-    const data = await UserRecidence.create(userRecidence);
+    const data = await UserRecidence.create(userRecidenceData);
     
-    // Devolvemos la URL completa para que el frontend la pueda mostrar
+    // Devolvemos el objeto creado
     res.status(201).send({
-      ...data.dataValues,
+      ...data.toJSON(), // Usamos toJSON() para consistencia
       image_url: req.file ? `${BASE_URL}/uploads/${req.file.filename}` : null
     });
 
   } catch (err) {
-    console.error("Error en create:", err.message);
     res.status(500).send({ message: err.message || "Error creando la residencia." });
   }
 };
 
-// Obtener todas las residencias
+// Obtener todas las residencias (Corregido y Limpio)
 exports.findAll = async (req, res) => {
   try {
-    const data = await UserRecidence.findAll();
+    const data = await UserRecidence.findAll({
+        include: [{ model: MedicalAssistant, as: 'assistant' }]
+    });
     
-    // CRUCIAL: Usamos el nombre de archivo (u.photo) para generar la URL COMPLETA
-    const dataWithUrl = data.map(u => ({
-      ...u.dataValues,
-      image_url: u.photo ? `${BASE_URL}/uploads/${u.photo}` : null // Corregido a URL completa
-    }));
+    const dataWithUrl = data.map(u => {
+      const plainObject = u.get({ plain: true }); // Convierte a objeto simple
+      
+      // Eliminamos la propiedad duplicada que sale null
+      delete plainObject.medical_assistant; 
+
+      return {
+        ...plainObject,
+        image_url: plainObject.photo ? `${BASE_URL}/uploads/${plainObject.photo}` : null
+      };
+    });
     res.send(dataWithUrl);
   } catch (err) {
-    console.error("Error en findAll:", err.message);
-    res.status(500).send({ message: err.message || "Error obteniendo residencias." });
+    res.status(500).send({ message: err.message });
   }
-};
 
+};
 // Actualizar residencia
 exports.update = async (req, res) => {
   const id = req.params.id;
   try {
-    const updateData = {
-      name: req.body.name,
-      medical_assistant: req.body.medical_assistant
-    };
+    // 1. Extraer el ID del cuerpo de la petición
+    let assistantId = req.body.medicalAssistantId;
 
-    let oldPhotoFilename = null;
-
-    // 1. Si se sube un nuevo archivo, buscamos el archivo antiguo
-    if (req.file) {
-        // Buscamos el registro actual para obtener el nombre del archivo de la foto antigua
-        const currentRecidence = await UserRecidence.findByPk(id);
-        if (currentRecidence && currentRecidence.photo) {
-            oldPhotoFilename = currentRecidence.photo;
-        }
-        
-        // Asignamos el nombre del nuevo archivo a los datos de actualización
-        updateData.photo = req.file.filename;
+    // 2. Limpieza de datos: Postman/Ionic pueden enviar 'null' como texto o vacío
+    if (assistantId === 'null' || assistantId === '' || assistantId === undefined) {
+      assistantId = null;
+    } else {
+      assistantId = parseInt(assistantId, 10); // Convertir a número entero
     }
 
-    const [num] = await UserRecidence.update(updateData, { where: { id } });
+    // 3. Preparar objeto de actualización
+    const updateData = {
+      name: req.body.name,
+      medicalAssistantId: assistantId // Usar el valor procesado
+    };
+
+    // 4. Manejo de nueva foto si existe
+    if (req.file) {
+      updateData.photo = req.file.filename;
+    }
+
+    // 5. Ejecutar la actualización en BD
+    const [num] = await UserRecidence.update(updateData, { where: { id: id } });
 
     if (num === 1) {
-        // 2. Si la actualización fue exitosa y existía una foto antigua, la eliminamos
-        if (oldPhotoFilename) {
-            deleteFile(oldPhotoFilename);
+      // Opcional: Recuperar el objeto actualizado para devolverlo completo
+      const updatedRecord = await UserRecidence.findByPk(id, {
+        include: [{ model: db.medicalAssistant, as: 'assistant' }]
+      });
+      
+      res.send({
+        message: "Actualizado con éxito",
+        data: {
+          ...updatedRecord.toJSON(),
+          image_url: updatedRecord.photo ? `http://localhost:8080/uploads/${updatedRecord.photo}` : null
         }
-
-        const newImageUrl = req.file 
-            ? `${BASE_URL}/uploads/${req.file.filename}` 
-            : null;
-
-        res.send({
-            message: "Actualizado correctamente.",
-            updated: updateData,
-            image_url: newImageUrl
-        });
-    } else res.status(404).send({ message: "No se pudo actualizar la residencia." });
-
+      });
+    } else {
+      res.status(404).send({ message: "No se encontró el registro o no hay cambios que aplicar." });
+    }
   } catch (err) {
-    console.error("Error en update:", err.message);
-    res.status(500).send({ message: err.message || "Error actualizando la residencia." });
+    res.status(500).send({ message: err.message });
   }
 };
 
@@ -149,22 +155,16 @@ exports.update = async (req, res) => {
 exports.delete = async (req, res) => {
   const id = req.params.id;
   try {
-    // 1. Buscamos el registro *antes* de borrarlo de la DB
     const recidenceToDelete = await UserRecidence.findByPk(id);
-    let photoFilename = recidenceToDelete ? recidenceToDelete.photo : null;
+    const photoFilename = recidenceToDelete?.photo;
     
-    // 2. Eliminamos el registro de la base de datos
     const num = await UserRecidence.destroy({ where: { id } });
 
     if (num === 1) {
-        // 3. Si se eliminó correctamente de la DB, eliminamos la foto del disco
-        if (photoFilename) {
-            deleteFile(photoFilename);
-        }
+        if (photoFilename) deleteFile(photoFilename);
         res.status(204).send();
     } else res.status(404).send({ message: "No se pudo eliminar." });
   } catch (err) {
-    console.error("Error en delete:", err.message);
-    res.status(500).send({ message: err.message || "Error eliminando la residencia." });
+    res.status(500).send({ message: err.message });
   }
 };

@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { NavController } from '@ionic/angular';
+import { NavController, ToastController } from '@ionic/angular';
+import { AuthService } from '../services/auth.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -9,44 +11,77 @@ import { NavController } from '@ionic/angular';
 })
 export class LoginPage implements OnInit {
 
-  user: string = '';
-  password: string = '';
+  credentials = {
+    email: '',
+    password: ''
+  };
 
-  // Cuatro usuarios válidos (ejemplo)
-  validUsers = [
-    { user: 'juan', pass: '1234' },
-    { user: 'maria', pass: 'abcd' },
-    { user: 'pedro', pass: 'qwerty' },
-    { user: 'laura', pass: 'pass123' }
-  ];
-
-  constructor(private navCtrl: NavController) { }
+  constructor(
+    private navCtrl: NavController,
+    private authService: AuthService,
+    private toastController: ToastController,
+    private http: HttpClient 
+  ) { }
 
   ngOnInit() {}
 
-  // ... (resto del código)
-
-  async login() {
-    console.log('Intentando iniciar sesión con:', this.user, this.password);
-
-    // Buscar si el usuario y contraseña coinciden con uno de los válidos
-    const found = this.validUsers.find(
-      u => u.user === this.user && u.pass === this.password
-    );
-
-    if (found) {
-      console.log('Login exitoso!');
-      
-      // 🛑 FIX: Quitar el foco del elemento activo (el botón) antes de la navegación.
-      // Esto previene el error 'Blocked aria-hidden' y permite la interacción.
-      if (document.activeElement instanceof HTMLElement) {
-          (document.activeElement as HTMLElement).blur();
+  // FUNCIÓN PARA EL BOTÓN DE ACCESO TEMPORAL
+  generateToken() {
+    this.http.get<any>('http://localhost:8080/api/auth/temp-token').subscribe({
+      next: async (res: any) => {
+        // Unificamos: siempre guardar como 'auth_token'
+        const token = res.accessToken || res.token;
+        if (token) {
+          localStorage.setItem('auth_token', token);
+          await this.presentToast('¡Acceso temporal concedido!', 'success');
+          this.navCtrl.navigateRoot('/my-recidence');
+        }
+      },
+      error: async (err: any) => {
+        console.error('Error al generar token:', err);
+        await this.presentToast('No se pudo generar el acceso temporal', 'danger');
       }
-      
-      this.navCtrl.navigateRoot('/my-recidence');
-    } else {
-      console.log('Credenciales incorrectas');
-      // Aquí puedes agregar un alert de Ionic, Toast, etc.
-    }
-  }
+    });
+  }
+
+  async onLogin() {
+    this.authService.login(this.credentials.email, this.credentials.password).subscribe({
+      next: async (res: any) => {
+        console.log('Login exitoso, preparando navegación...');
+        // El AuthService ya guardó el 'auth_token' gracias al pipe(tap)
+        // Guardamos el resto de datos del usuario si son necesarios
+        localStorage.setItem('userData', JSON.stringify(res));
+        setTimeout(() => {
+    this.navCtrl.navigateRoot('/my-recidence');
+  }, 100);
+        // Quitamos el foco del teclado
+        if (document.activeElement instanceof HTMLElement) {
+          (document.activeElement as HTMLElement).blur();
+        }
+        
+        // Navegamos
+        this.navCtrl.navigateRoot('/my-recidence');
+      },
+      error: async (err: any) => {
+        console.error('Error en login:', err);
+        const mensaje = err.error?.message || 'Email o contraseña incorrectos';
+        await this.presentToast(mensaje, 'danger');
+      }
+    });
+  }
+
+  goToRegister() {
+    this.navCtrl.navigateForward('/register');
+  }
+
+  // He mejorado el Toast para que acepte colores
+  async presentToast(msj: string, color: string = 'danger') {
+    const toast = await this.toastController.create({
+      message: msj,
+      duration: 2000,
+      color: color,
+      position: 'bottom'
+    });
+    await toast.present();
+  }
 }

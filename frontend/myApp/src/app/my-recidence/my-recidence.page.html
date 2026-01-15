@@ -1,70 +1,119 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-title>Gestión de Residentes</ion-title>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    
+    <ion-segment [value]="selectedSegment" (ionChange)="segmentChanged($event)">
+      <ion-segment-button value="registro">
+        <ion-label>Registro</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="lista">
+        <ion-label>Lista</ion-label>
+      </ion-segment-button>
+    </ion-segment>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
 
-  <form [formGroup]="recidenceForm" (ngSubmit)="onSubmit()">
-    <ion-list lines="full">
-      <ion-item>
-        <ion-label position="floating">Nombre del Residente</ion-label>
-        <ion-input formControlName="name" type="text"></ion-input>
-      </ion-item>
-
-      <ion-item>
-        <ion-label position="floating">Asistente Médico</ion-label>
-        <ion-input formControlName="medical_assistant" type="text"></ion-input>
-      </ion-item>
-
-      <ion-item>
-        <ion-label position="stacked">Foto del Residente</ion-label>
-        <input type="file" #fileInput (change)="onFileChange($event)" accept="image/*">
-      </ion-item>
-    </ion-list>
-
-    <ion-card *ngIf="imagePreview" class="ion-margin-top">
+  <div *ngIf="selectedSegment === 'registro'">
+    <ion-card>
       <ion-card-header>
-        <ion-card-title>Vista Previa</ion-card-title>
+        <ion-badge color="secondary">{{ isEditing ? 'Editando Residente' : 'Nuevo Residente' }}</ion-badge>
       </ion-card-header>
-      <ion-card-content class="ion-text-center">
-        <img [src]="imagePreview" alt="Vista Previa" style="max-width:150px; max-height:150px; border-radius:8px; object-fit:cover;">
+      <ion-card-content>
+        <form [formGroup]="recidenceForm" (ngSubmit)="onSubmit()">
+          <ion-grid>
+            <ion-row>
+              <ion-col size="12" size-md="6">
+                <ion-item lines="full" fill="outline">
+                  <ion-label position="floating">Nombre del Residente</ion-label>
+                  <ion-input formControlName="name" type="text"></ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col size="12" size-md="6">
+                <ion-item lines="full" fill="outline">
+                  <ion-label position="floating">Asistente Médico</ion-label>
+                  <ion-select formControlName="medicalAssistantId" placeholder="Seleccione">
+                    <ion-select-option *ngFor="let ast of assistants" [value]="ast.id">
+                      {{ ast.name }}
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size="12">
+                <ion-button fill="outline" expand="block" class="ion-margin-top">
+                  <ion-icon name="image" slot="start"></ion-icon>
+                  Subir Foto
+                  <input type="file" #fileInput (change)="onFileChange($event)" accept="image/*" style="opacity: 0; position: absolute; width: 100%; height: 100%;">
+                </ion-button>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+
+          <ion-card *ngIf="imagePreview" class="ion-margin-top ion-text-center">
+            <img [src]="imagePreview" style="max-width:150px; border-radius:10px; padding:10px;">
+          </ion-card>
+
+          <ion-button expand="full" type="submit" [disabled]="recidenceForm.invalid" class="ion-margin-top">
+            {{ isEditing ? 'Actualizar' : 'Guardar' }}
+          </ion-button>
+          <ion-button *ngIf="isEditing" color="medium" expand="full" fill="outline" (click)="resetForm()">Cancelar</ion-button>
+        </form>
       </ion-card-content>
     </ion-card>
 
-    <ion-button expand="full" type="submit" [disabled]="recidenceForm.invalid" class="ion-margin-top">
-      {{ isEditing ? 'Guardar Cambios' : 'Registrar Residente' }}
-    </ion-button>
+    <ion-list class="ion-margin-top">
+      <ion-list-header><ion-label color="primary">Residentes</ion-label></ion-list-header>
+      <ion-item *ngFor="let rec of usersRecidence">
+        <ion-avatar slot="start">
+          <img [src]="rec.image_url || 'assets/person-placeholder.png'">
+        </ion-avatar>
+        <ion-label>
+          <h2>{{ rec.name }}</h2>
+          <p>Asistente: {{ rec.assistant?.name || 'N/A' }}</p>
+        </ion-label>
+        <ion-buttons slot="end">
+          <ion-button (click)="editRecidence(rec)" color="primary"><ion-icon name="create"></ion-icon></ion-button>
+          <ion-button (click)="confirmDelete(rec.id)" color="danger"><ion-icon name="trash"></ion-icon></ion-button>
+        </ion-buttons>
+      </ion-item>
+    </ion-list>
+  </div>
 
-    <ion-button *ngIf="isEditing" color="medium" expand="full" (click)="resetForm()" fill="outline">
-      Cancelar Edición
-    </ion-button>
-  </form>
-
-  <ion-card *ngFor="let recidence of usersRecidence" class="ion-margin-top">
-    <ion-card-content>
-      <div style="display:flex; align-items:center;">
-        
-        <img *ngIf="recidence.image_url" [src]="recidence.image_url" alt="Foto" style="width:80px; height:80px; border-radius:50%; object-fit:cover;">
-        
-        <ion-icon *ngIf="!recidence.image_url" name="person-circle-outline" style="font-size:80px;"></ion-icon>
-
-        <div style="margin-left:16px;">
-          <ion-card-title>{{ recidence.name }}</ion-card-title>
-          <ion-card-subtitle>Asistente: {{ recidence.medical_assistant }}</ion-card-subtitle>
-        </div>
-
-        <div style="margin-left:auto;">
-          <ion-button color="primary" fill="clear" size="small" (click)="editRecidence(recidence)">
-            <ion-icon name="create" slot="start"></ion-icon> Editar
-          </ion-button>
-          <ion-button color="danger" fill="clear" size="small" (click)="confirmDelete(recidence.id)">
-            <ion-icon name="trash" slot="start"></ion-icon> Eliminar
-          </ion-button>
-        </div>
-      </div>
-    </ion-card-content>
-  </ion-card>
+  <div *ngIf="selectedSegment === 'lista'">
+    <ion-card *ngFor="let ast of assistantsWithResidents" class="ion-margin-bottom">
+      <ion-item color="light">
+        <ion-icon name="medkit" slot="start" color="primary"></ion-icon>
+        <ion-label>
+          <strong>{{ ast.name }}</strong>
+          <p>{{ ast.specialty }}</p>
+        </ion-label>
+        <ion-badge slot="end" color="primary">{{ ast.residents?.length || 0 }} / 3</ion-badge>
+      </ion-item>
+      
+      <ion-card-content class="ion-no-padding">
+        <ion-list lines="inset">
+          <ion-item *ngFor="let res of ast.residents">
+            <ion-avatar slot="start">
+              <img [src]="res.image_url || 'assets/users.png'">
+              
+            </ion-avatar>
+            <ion-label>
+              <h3>{{ res.name }}</h3>
+              <p>ID: #{{ res.id }}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item *ngIf="!ast.residents || ast.residents.length === 0">
+            <ion-label color="medium" class="ion-text-center"><small>Sin residentes</small></ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
 
 </ion-content>

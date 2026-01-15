@@ -1,39 +1,44 @@
 <ion-content>
-    <div class="main-container">
-        <ion-card>
-            <ion-card-content>
-                <div class="header-content">
-                    <ion-icon name="person-circle-outline" class="logo"></ion-icon>
-                    <h1>Iniciar Sesión</h1>
-                </div>
+  <div class="main-container">
+    <ion-card>
+      <ion-card-content>
+        <div class="header-content">
+          <ion-icon name="person-circle-outline" class="logo"></ion-icon>
+          <h1>Iniciar Sesión</h1>
+        </div>
 
-                <!-- Quitamos form porque no lo necesitas -->
-                <ion-item>
-                    <ion-icon name="mail-outline" slot="start"></ion-icon>
-                    <ion-input 
-                        placeholder="Usuario" 
-                        [(ngModel)]="user">
-                    </ion-input>
-                </ion-item>
+        <ion-item>
+          <ion-icon name="mail-outline" slot="start"></ion-icon>
+          <ion-input 
+            type="email"
+            placeholder="Correo electrónico" 
+            [(ngModel)]="credentials.email">
+          </ion-input>
+        </ion-item>
 
-                <ion-item>
-                    <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
-                    <ion-input 
-                        type="password" 
-                        placeholder="Contraseña" 
-                        [(ngModel)]="password">
-                    </ion-input>
-                </ion-item>
+        <ion-item>
+          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+          <ion-input 
+            type="password" 
+            placeholder="Contraseña" 
+            [(ngModel)]="credentials.password">
+          </ion-input>
+        </ion-item>
 
-                <!-- Ahora sí llama al método login -->
-                <ion-button expand="block" (click)="login()">
-                    Entrar
-                </ion-button>
+        <ion-button expand="block" (click)="onLogin()" class="ion-margin-top">
+          Entrar
+        </ion-button>
 
-                <a href="/forgot-password" class="forgot-password">
-                    ¿Olvidaste tu contraseña?
-                </a>
-            </ion-card-content>
-        </ion-card>
-    </div>
+        <ion-button expand="block" fill="outline" (click)="goToRegister()">
+          Crear cuenta de personal
+        </ion-button>
+
+        <div class="footer-links">
+          <a (click)="generateToken()" class="token-generator">
+            Generar token de acceso temporal
+          </a>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
 </ion-content>
