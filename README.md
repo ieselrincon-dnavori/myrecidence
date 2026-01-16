@@ -4,10 +4,6 @@ _Sistema de control de residentes y sus asistentes médicos asignados, autentica
 
 ## Comenzando 🚀
 
-_Estas instrucciones te permitirán obtener una copia del proyecto en funcionamiento en tu máquina local para propósitos de desarrollo y pruebas._
-
-Mira **Deployment** para conocer como desplegar el proyecto.
-
 ### Pre-requisitos 📋
 
 _Necesitas tener instalados los siguientes entornos para ejecutar el software:_
