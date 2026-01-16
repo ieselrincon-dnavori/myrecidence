@@ -61,8 +61,10 @@ _Herramientas utilizadas en el desarrollo:_
 
 ## Documentación de la API 
 
+
  _La API está protegida por JWT (JSON Web Tokens). Todas las peticiones a las rutas de residentes requieren el encabezado Authorization: Bearer <token>._ 
 
+* [Enlace postman] (https://www.postman.com/docking-module-cosmologist-38391998/workspace/domingonavarro-pgl/collection/41585331-3306f5f0-5266-4b4a-9930-2d6f43a0d5c7?action=share&source=copy-link&creator=41585331)
 ## Configuración de llamadas en postman 📖
 _El método para obtener el token, lleva implementando un script para que se guarde automáticamente, en la carpeta raíz de la colección, indicamos que la autorización es mediante Token Bearer y en cada uno de los métodos hijos tiene la autenticación heredada._
 
